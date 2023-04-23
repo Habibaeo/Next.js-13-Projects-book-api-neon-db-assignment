@@ -1,5 +1,5 @@
 import { Pool } from '@neondatabase/serverless';
-
+import { NextResponse, NextRequest } from 'next/server';
 interface Order {
   id: string;
   bookId: number;
@@ -10,7 +10,7 @@ interface Order {
   timestamp: number;
 }
 
-export async function POST(request: Request, { params }: {
+export async function POST(request: NextRequest, { params }: {
   params: { id: string }
 }) {
   const requestBody = await request.json();
@@ -20,7 +20,7 @@ export async function POST(request: Request, { params }: {
   const quantity = requestBody.quantity;
 
   if (!bookId || !customerName || !quantity) {
-    return new Response(JSON.stringify({ error: 'Invalid request body' }), { status: 400 });
+    return new NextResponse(JSON.stringify({ error: 'Invalid request body' }), { status: 400 });
   }
 
   const order: Order = {
@@ -37,7 +37,7 @@ export async function POST(request: Request, { params }: {
   await pool.query(`INSERT INTO orders (id, bookId, customerName, created, createdBy, quantity, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
     [order.id, order.bookId, order.customerName, order.created, order.createdBy, order.quantity, order.timestamp]);
 
-  return new Response(JSON.stringify({ message: 'Order successfully placed' }));
+  return new NextResponse(JSON.stringify({ message: 'Order successfully placed' }));
 }
 
 export const runtime = 'edge';
