@@ -16,10 +16,8 @@ export async function handleRequest(request: Request): Promise<Response> {
     return new Response(JSON.stringify({ "error": "Invalid request parameters" }), { status: 400 });
   }
 
-  const clientEmail = requestData.clientEmail || '';
-
   try {
-    const { rows } = await pool.query(`INSERT INTO orders (book_id, client_name, client_email) VALUES ($1, $2, $3) RETURNING *`, [bookId, customerName, clientEmail]);
+    const { rows } = await pool.query(`INSERT INTO orders (bookId, clientName) VALUES ($1, $2, $3) RETURNING *`, [bookId, customerName]);
     const order: Order = {
       id: rows[0].id,
       bookId: rows[0].bookId,
