@@ -1,4 +1,5 @@
 import { Pool } from '@neondatabase/serverless';
+import { NextRequest, NextResponse } from 'next/server';
 
 interface Order {
   id: string;
@@ -7,13 +8,13 @@ interface Order {
   
 }
 
-export async function POST(request: Request): Promise<Response> {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
   const requestData = await request.json();
 
   const { bookId, customerName } = requestData;
   if (!bookId || !customerName) {
-    return new Response(JSON.stringify({ "error": "Invalid request parameters" }), { status: 400 });
+    return new NextResponse(JSON.stringify({ "error": "Invalid request parameters" }), { status: 400 });
   }
 
   try {
@@ -26,12 +27,13 @@ export async function POST(request: Request): Promise<Response> {
     };
 
     const content = JSON.stringify(orders);
-    return new Response(content);
+    return new NextResponse(content);
   } catch (error) {
-    return new Response(JSON.stringify({ "error": "Internal Server Error" }), { status: 500 });
+    return new NextResponse(JSON.stringify({ "error": "Internal Server Error" }), { status: 500 });
   } finally {
     await pool.end();
   }
 }
 
 export const runtime = 'edge';
+
