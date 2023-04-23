@@ -1,40 +1,43 @@
 import { Pool } from '@neondatabase/serverless';
-import { NextRequest, NextResponse } from 'next/server';
 
 interface Order {
-  id: number;
-  book_id: string;
-  client_name: string;
-  client_email: string;
-  status: string;
+  id: string;
+  bookId: number;
+  customerName: string;
+  created: boolean;
+  createdBy: string;
+  quantity: number;
+  timestamp: number;
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(request: Request, { params }: {
+  params: { id: string }
+}) {
+  const requestBody = await request.json();
+
+  const bookId = requestBody.bookId;
+  const customerName = requestBody.customerName;
+  const quantity = requestBody.quantity;
+
+  if (!bookId || !customerName || !quantity) {
+    return new Response(JSON.stringify({ error: 'Invalid request body' }), { status: 400 });
+  }
+
+  const order: Order = {
+    id: Math.random().toString(36).substring(7),
+    bookId: bookId,
+    customerName: customerName,
+    created: true,
+    createdBy: 'API',
+    quantity: quantity,
+    timestamp: Date.now()
+  };
+
   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
-  const requestData = await request.json();
+  await pool.query(`INSERT INTO orders (id, bookId, customerName, created, createdBy, quantity, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [order.id, order.bookId, order.customerName, order.created, order.createdBy, order.quantity, order.timestamp]);
 
-  const { book_id, client_name, client_email } = requestData;
-  if (!book_id || !client_name) {
-    return new NextResponse(JSON.stringify({ "error": "Invalid request parameters" }), { status: 400 });
-  }
-
-  try {
-    const { rows } = await pool.query(`INSERT INTO orders (book_id, client_name, client_email) VALUES ($1, $2, $3) RETURNING *`, [book_id, client_name, client_email]);
-    const order: Order = {
-      id: rows[0].id,
-      book_id: rows[0].book_id,
-      client_name: rows[0].client_name,
-      client_email: rows[0].client_email,
-      status: rows[0].status,
-    };
-
-    const content = JSON.stringify(order);
-    return new NextResponse(content);
-  } catch (error) {
-    return new NextResponse(JSON.stringify({ "error": "Internal Server Error" }), { status: 500 });
-  } finally {
-    await pool.end();
-  }
+  return new Response(JSON.stringify({ message: 'Order successfully placed' }));
 }
 
 export const runtime = 'edge';
