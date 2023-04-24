@@ -51,15 +51,25 @@ interface Book {
 }
 
 export async function GET(request: NextRequest) {
-  const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
-
   try {
+    const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
+
     // Retrieve all orders from the orders table
     const { rows: orders } = await pool.query<Order>('SELECT * FROM orders');
+
+    // If no orders found, return an error response
+    if (orders.length === 0) {
+      return new NextResponse(JSON.stringify({ error: 'No orders found' }), { status: 404 });
+    }
 
     // Retrieve book information for each order
     const bookIds = [...new Set(orders.map(order => order.bookId))];
     const { rows: books } = await pool.query<Book>('SELECT * FROM books WHERE id IN (' + bookIds.join(',') + ')');
+
+    // If no books found for the orders, return an error response
+    if (books.length === 0) {
+      return new NextResponse(JSON.stringify({ error: 'No books found for the orders' }), { status: 404 });
+    }
 
     // Join the order and book information
     const orderData = orders.map(order => {
@@ -84,6 +94,7 @@ export async function GET(request: NextRequest) {
 }
 
 export const runtime = 'edge';
+
 
 
 
