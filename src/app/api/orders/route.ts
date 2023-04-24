@@ -40,7 +40,46 @@ export async function POST(request: NextRequest, { params }: {
   return new NextResponse(JSON.stringify({ message: 'Order successfully placed' }));
 }
 
+
+
+// Orders retrieval
+
+interface Book {
+  id: number;
+  name: string;
+  price: number;
+}
+
+export async function GET(request: NextRequest) {
+  const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
+
+  // Retrieve all orders from the orders table
+  const { rows: orders } = await pool.query<Order>('SELECT * FROM orders');
+
+  // Retrieve book information for each order
+  const bookIds = [...new Set(orders.map(order => order.bookId))];
+  const { rows: books } = await pool.query<Book>('SELECT * FROM books WHERE id IN (' + bookIds.join(',') + ')');
+
+  // Join the order and book information
+  const orderData = orders.map(order => {
+    const book = books.find(book => book.id === order.bookId);
+    const price = book ? book.price : 0;
+    const total = order.quantity * price;
+
+    return {
+      id: order.id,
+      bookName: book ? book.name : '',
+      quantity: order.quantity,
+      pricePerUnit: price,
+      totalPrice: total
+    };
+  });
+
+  return new NextResponse(JSON.stringify(orderData));
+}
+
 export const runtime = 'edge';
+
 
 
 
