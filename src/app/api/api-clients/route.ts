@@ -41,5 +41,6 @@ export async function POST(request: Request) {
   return new Response(responseBody);
 }
 
-export const methods = ['POST'];
-export const next = '/api_clients';
+// export const methods = ['POST'];
+// export const next = '/api-clients';
+export const runtime = 'edge';
