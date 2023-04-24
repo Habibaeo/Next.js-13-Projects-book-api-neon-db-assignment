@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 
 import { jwtVerify } from 'jose';
 
-const allowedAccessTypes:string[] = ['/orders'];
+const allowedAccessTypes:string[] = ['/order'];
 
 async function verify(token: string, secret: string): Promise<any> {
     //{ apiClientId: string, clientName: string, clientEmail: string, accessPermissions: string }
@@ -77,5 +77,5 @@ export async function middleware(request: NextRequest, ) {
 
 // See "Matching Paths" below to learn more
 export const config = {
-    matcher: ['/orders', '/orders/:id*']
+    matcher: ['/orde', '/orde/:id*']
 }
