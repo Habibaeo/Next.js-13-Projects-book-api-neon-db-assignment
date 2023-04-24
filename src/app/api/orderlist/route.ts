@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     // If no books found for the orders, return an error response
     if (books.length === 0) {
       return new NextResponse(JSON.stringify({ error: 'No books found for the orders' }), { status: 404 });
-    }else{
+    }
 
     // Join the order and book information
     const orderData = orders.map(order => {
@@ -58,9 +58,9 @@ export async function GET(request: NextRequest) {
       };
       
     });
-
+    console.log(orderData);
     return new NextResponse(JSON.stringify(orderData));
-}
+
   } catch (error: any) {
     console.error(error);
     return new NextResponse(JSON.stringify({ error: 'Internal Server Error: ' + error.message }), { status: 500 });
