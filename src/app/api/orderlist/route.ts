@@ -54,10 +54,13 @@ interface Book {
       });
   
       return new NextResponse(JSON.stringify(orderData));
-    } catch (error) {
+    } 
+    catch (error: any) {
       console.error(error);
-      return new NextResponse(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+      return new NextResponse(JSON.stringify({ error: 'Internal Server Error: ' + error.message }), { status: 500 });
     }
   }
 
   export const runtime = 'edge';
+
+  
