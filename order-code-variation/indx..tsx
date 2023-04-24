@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 interface Order {
   id: number;
-  book_id: string;
-  client_name: string;
-  client_email: string;
+  bookId: string;
+  clientName: string;
+  clientEmail: string;
   status: string;
 }
 
@@ -14,18 +14,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
   const requestData = await request.json();
 
-  const { book_id, client_name, client_email } = requestData;
-  if (!book_id || !client_name) {
+  const { bookId, clientName, clientEmail } = requestData;
+  if (!bookId || !clientName) {
     return new NextResponse(JSON.stringify({ "error": "Invalid request parameters" }), { status: 400 });
   }
 
   try {
-    const { rows } = await pool.query(`INSERT INTO orders (book_id, client_name, client_email) VALUES ($1, $2, $3) RETURNING *`, [book_id, client_name, client_email]);
+    const { rows } = await pool.query(`INSERT INTO orders (bookId, clientName, clientEmail) VALUES ($1, $2, $3) RETURNING *`, [bookId, clientName, clientEmail]);
     const order: Order = {
       id: rows[0].id,
-      book_id: rows[0].book_id,
-      client_name: rows[0].client_name,
-      client_email: rows[0].client_email,
+      bookId: rows[0].bookId,
+      clientName: rows[0].clientName,
+      clientEmail: rows[0].clientEmail,
       status: rows[0].status,
     };
 
