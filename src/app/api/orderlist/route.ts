@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     // If no books found for the orders, return an error response
     if (books.length === 0) {
       return new NextResponse(JSON.stringify({ error: 'No books found for the orders' }), { status: 404 });
-    }
+    }else{
 
     // Join the order and book information
     const orderData = orders.map(order => {
@@ -56,9 +56,11 @@ export async function GET(request: NextRequest) {
         pricePerUnit: price,
         totalPrice: total
       };
+      
     });
 
     return new NextResponse(JSON.stringify(orderData));
+}
   } catch (error: any) {
     console.error(error);
     return new NextResponse(JSON.stringify({ error: 'Internal Server Error: ' + error.message }), { status: 500 });
@@ -68,4 +70,45 @@ export async function GET(request: NextRequest) {
 export const runtime = 'edge';
 
 
-  
+// import { Pool } from '@neondatabase/serverless';
+
+// interface Book {
+//   id: string;
+//   name: string;
+//   author: string;
+//   isbn: number|null;
+//   type: string;
+//   price: number;
+//   currentStock: number;
+//   available: boolean;
+// }
+
+// export async function GET(request: Request) {
+//   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
+//   const { rows } = await pool.query(`SELECT * FROM books`);
+
+//   let content: string;
+
+//   console.log(rows);
+//   if (!rows || rows.length === 0) {
+//     content = JSON.stringify({
+//       "error": "No books found"
+//     });
+//   } else {
+//     const books: Book[] = rows.map((row: any) => ({
+//       id: row.id,
+//       name: row.name,
+//       author: row.author,
+//       isbn: row.isbn,
+//       type: row.type,
+//       price: row.price,
+//       currentStock: row.current_stock,
+//       available: row.available
+//     }));
+//     content = JSON.stringify(books);
+//   }
+//   // event.waitUntil(pool.end());  // doesn't hold up the response
+//   return new Response(content);
+// }
+
+// export const runtime = 'edge';
