@@ -63,17 +63,15 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-// export const config = {
-//   api: {
-//     bodyParser: {
-//       sizeLimit: '1mb',
-//     },
-//   },
-// }
-
 export const config = {
-    matcher: ['/orders', '/orders/:id*']
-}
+  api: {
+    bodyParser: {
+      sizeLimit: '1mb',
+    },
+  },
+  matcher: ['/orders', '/orders/:id*']
+};
+
 
 
 
