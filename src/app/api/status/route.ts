@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { Pool } from '@neondatabase/serverless';
 
 
-async function checkApiAvailability() {
+export async function checkApiAvailability() {
   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
 
   try {
