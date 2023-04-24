@@ -53,32 +53,79 @@ interface Book {
 export async function GET(request: NextRequest) {
   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
 
-  // Retrieve all orders from the orders table
-  const { rows: orders } = await pool.query<Order>('SELECT * FROM orders');
+  try {
+    // Retrieve all orders from the orders table
+    const { rows: orders } = await pool.query<Order>('SELECT * FROM orders');
 
-  // Retrieve book information for each order
-  const bookIds = [...new Set(orders.map(order => order.bookId))];
-  const { rows: books } = await pool.query<Book>('SELECT * FROM books WHERE id IN (' + bookIds.join(',') + ')');
+    // Retrieve book information for each order
+    const bookIds = [...new Set(orders.map(order => order.bookId))];
+    const { rows: books } = await pool.query<Book>('SELECT * FROM books WHERE id IN (' + bookIds.join(',') + ')');
 
-  // Join the order and book information
-  const orderData = orders.map(order => {
-    const book = books.find(book => book.id === order.bookId);
-    const price = book ? book.price : 0;
-    const total = order.quantity * price;
+    // Join the order and book information
+    const orderData = orders.map(order => {
+      const book = books.find(book => book.id === order.bookId);
+      const price = book ? book.price : 0;
+      const total = order.quantity * price;
 
-    return {
-      id: order.id,
-      bookName: book ? book.name : '',
-      quantity: order.quantity,
-      pricePerUnit: price,
-      totalPrice: total
-    };
-  });
+      return {
+        id: order.id,
+        bookName: book ? book.name : '',
+        quantity: order.quantity,
+        pricePerUnit: price,
+        totalPrice: total
+      };
+    });
 
-  return new NextResponse(JSON.stringify(orderData));
+    return new NextResponse(JSON.stringify(orderData));
+  } catch (error) {
+    console.error(error);
+    return new NextResponse(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+  }
 }
 
 export const runtime = 'edge';
+
+
+
+
+
+
+
+// interface Book {
+//   id: number;
+//   name: string;
+//   price: number;
+// }
+
+// export async function GET(request: NextRequest) {
+//   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
+
+//   // Retrieve all orders from the orders table
+//   const { rows: orders } = await pool.query<Order>('SELECT * FROM orders');
+
+//   // Retrieve book information for each order
+//   const bookIds = [...new Set(orders.map(order => order.bookId))];
+//   const { rows: books } = await pool.query<Book>('SELECT * FROM books WHERE id IN (' + bookIds.join(',') + ')');
+
+//   // Join the order and book information
+//   const orderData = orders.map(order => {
+//     const book = books.find(book => book.id === order.bookId);
+//     const price = book ? book.price : 0;
+//     const total = order.quantity * price;
+
+//     return {
+//       id: order.id,
+//       bookName: book ? book.name : '',
+//       quantity: order.quantity,
+//       pricePerUnit: price,
+//       totalPrice: total
+//     };
+//   });
+
+//   return new NextResponse(JSON.stringify(orderData));
+// }
+
+// export const runtime = 'edge';
 
 
 
