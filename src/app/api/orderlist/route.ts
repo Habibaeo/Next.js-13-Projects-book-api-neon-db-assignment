@@ -1,5 +1,5 @@
 import { Pool } from '@neondatabase/serverless';
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 interface Order {
   id: string;
@@ -14,40 +14,101 @@ interface Order {
 interface Book {
   id: number;
   name: string;
+  author: string;
+  isbn: string;
+  type: string;
   price: number;
+  currentStock: number;
+  available: boolean;
 }
 
-export async function GET(request: NextRequest, { params }: {
-  params: { id: string }
-}) {
+export async function GET(request: NextRequest) {
   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
-  const ordersResult = await pool.query('SELECT * FROM orders');
 
-  const bookIds = ordersResult.rows.map((order) => order.bookId);
-  const booksResult = await pool.query(`SELECT id, name, price FROM books WHERE id = ANY($1)`, [bookIds]);
+  const result = await pool.query(
+    `SELECT o.id, o.bookId, o.customerName, o.created, o.createdBy, o.quantity, o.timestamp, b.name, b.price 
+    FROM orders o 
+    INNER JOIN books b ON o.bookId = b.id`
+  );
 
-  const books = booksResult.rows.reduce((obj, book) => {
-    obj[book.id] = book;
-    return obj;
-  }, {});
+  const orders: Array<any> = [];
 
-  const orders = ordersResult.rows.map((order) => {
-    const book = books[order.bookId];
-    const price = book.price;
-    const totalPrice = price * order.quantity;
-    return {
-      id: order.id,
-      bookName: book.name,
-      quantity: order.quantity,
-      pricePerUnit: price,
-      totalPrice: totalPrice
-    }
+  result.rows.forEach((row) => {
+    const order = {
+      id: row.id,
+      bookName: row.name,
+      bookId: row.bookId,
+      customerName: row.customerName,
+      created: row.created,
+      createdBy: row.createdBy,
+      quantity: row.quantity,
+      timestamp: row.timestamp,
+      price: row.price,
+      totalPrice: row.quantity * row.price,
+    };
+
+    orders.push(order);
   });
 
-  return new NextResponse(JSON.stringify(orders));
+  return new NextResponse(JSON.stringify({ orders }), { headers: { 'Content-Type': 'application/json' } });
 }
 
 export const runtime = 'edge';
+
+
+
+
+
+// import { Pool } from '@neondatabase/serverless';
+// import { NextResponse, NextRequest } from 'next/server';
+
+// interface Order {
+//   id: string;
+//   bookId: number;
+//   customerName: string;
+//   created: boolean;
+//   createdBy: string;
+//   quantity: number;
+//   timestamp: number;
+// }
+
+// interface Book {
+//   id: number;
+//   name: string;
+//   price: number;
+// }
+
+// export async function GET(request: NextRequest, { params }: {
+//   params: { id: string }
+// }) {
+//   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
+//   const ordersResult = await pool.query('SELECT * FROM orders');
+
+//   const bookIds = ordersResult.rows.map((order) => order.bookId);
+//   const booksResult = await pool.query(`SELECT id, name, price FROM books WHERE id = ANY($1)`, [bookIds]);
+
+//   const books = booksResult.rows.reduce((obj, book) => {
+//     obj[book.id] = book;
+//     return obj;
+//   }, {});
+
+//   const orders = ordersResult.rows.map((order) => {
+//     const book = books[order.bookId];
+//     const price = book.price;
+//     const totalPrice = price * order.quantity;
+//     return {
+//       id: order.id,
+//       bookName: book.name,
+//       quantity: order.quantity,
+//       pricePerUnit: price,
+//       totalPrice: totalPrice
+//     }
+//   });
+
+//   return new NextResponse(JSON.stringify(orders));
+// }
+
+// export const runtime = 'edge';
 
 
 
