@@ -6,10 +6,10 @@ async function checkApiAvailability() {
 
   try {
     const { rows } = await pool.query('SELECT NOW()');
-    return rows[0].now;
+    return true;
   } catch (error) {
     console.error('Error checking API availability:', error);
-    return null;
+    return false;
   }
 }
 
@@ -27,3 +27,4 @@ export async function GET(request: NextRequest) {
     }));
   }
 }
+
