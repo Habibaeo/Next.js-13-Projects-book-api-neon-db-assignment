@@ -30,7 +30,7 @@ export async function POST(request: NextRequest, { params }: {
     created: true,
     createdBy: 'API',
     quantity: quantity,
-    timestamp: Date.now()
+    timestamp: Math.floor(Date.now()/1000)
   };
 
   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
