@@ -13,7 +13,7 @@ interface ApiClientToken {
 }
 
 export async function POST(request: Request) {
-  console.log(JSON.stringify(request))
+  console.log(`My API request: Trying to Post ${JSON.stringify(request)}`)
     const { clientName, clientEmail }:ApiClient = await request.json();
 
   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
