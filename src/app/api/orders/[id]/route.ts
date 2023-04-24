@@ -1,8 +1,8 @@
 import { Pool } from '@neondatabase/serverless';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function DELETE(request: NextRequest, { params }: { params: { orderId: string } }) {
-  const orderId = params.orderId;
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const orderId = params.id;
   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
 
   const result = await pool.query('DELETE FROM orders WHERE id=$1 RETURNING *', [orderId]);
