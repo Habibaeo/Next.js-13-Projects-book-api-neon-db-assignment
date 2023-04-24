@@ -13,7 +13,8 @@ interface ApiClientToken {
 }
 
 export async function POST(request: Request) {
-  const { clientName, clientEmail } = await request.json();
+  console.log(JSON.stringify(request))
+    const { clientName, clientEmail } = await request.json();
 
   const pool = new Pool({ connectionString: process.env.NEON_DATABASE_URL });
 
@@ -41,6 +42,6 @@ export async function POST(request: Request) {
   return new Response(responseBody);
 }
 
-// export const methods = ['POST'];
+ export const methods = ['POST'];
 // export const next = '/api-clients';
 export const runtime = 'edge';
